@@ -1,6 +1,6 @@
-package Mobile::UserAgent::WURFL;
+package Mobile::UserAgent::WURFL::Name;
 
-# Created on: 2012-04-22 04:31:16
+# Created on: 2012-04-22 06:12:15
 # Create by:  Ivan Wills
 # $Id$
 # $Revision$, $HeadURL$, $Date$
@@ -21,32 +21,7 @@ our @EXPORT_OK   = qw//;
 our %EXPORT_TAGS = ();
 #our @EXPORT      = qw//;
 
-has ua => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
-);
 
-has name => (
-    is       => 'ro',
-    isa      => 'Mobile::UserAgent::WURFL::Name',
-    lazy     => 1,
-    builder  => '_name',
-);
-
-has version => (
-    is       => 'ro',
-    isa      => 'Mobile::UserAgent::WURFL::Version',
-    lazy     => 1,
-    builder  => '_version',
-);
-
-has os => (
-    is       => 'ro',
-    isa      => 'Mobile::UserAgent::WURFL::OS',
-    lazy     => 1,
-    builder  => '_os',
-);
 
 1;
 
@@ -54,16 +29,16 @@ __END__
 
 =head1 NAME
 
-Mobile::UserAgent::WURFL - <One-line description of module's purpose>
+Mobile::UserAgent::WURFL::Name - <One-line description of module's purpose>
 
 =head1 VERSION
 
-This documentation refers to Mobile::UserAgent::WURFL version 0.1.
+This documentation refers to Mobile::UserAgent::WURFL::Name version 0.1.
 
 
 =head1 SYNOPSIS
 
-   use Mobile::UserAgent::WURFL;
+   use Mobile::UserAgent::WURFL::Name;
 
    # Brief but working code example(s) here showing the most common usage(s)
    # This section will be as far as many users bother reading, so make it as
