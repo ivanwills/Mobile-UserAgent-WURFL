@@ -20,4 +20,4 @@ tmp*
 vim.sh
 temp*
 errors.err
-t/wurfl.db
+t/wurfl.db*

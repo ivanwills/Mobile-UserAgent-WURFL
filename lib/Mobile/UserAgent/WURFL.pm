@@ -15,38 +15,54 @@ use List::Util;
 use Data::Dumper qw/Dumper/;
 use English qw/ -no_match_vars /;
 
+use Mobile::UserAgent::WURFL::UA;
 
 our $VERSION     = version->new('0.0.1');
 our @EXPORT_OK   = qw//;
 our %EXPORT_TAGS = ();
 #our @EXPORT      = qw//;
 
-has ua => (
-    is       => 'ro',
-    isa      => 'Str',
-    required => 1,
+has schema => (
+    is  => 'ro',
+    isa => 'Mobile::UserAgent::WURFL::Schema',
 );
 
-has name => (
-    is       => 'ro',
-    isa      => 'Mobile::UserAgent::WURFL::Name',
-    lazy     => 1,
-    builder  => '_name',
-);
+around BUILDARGS => sub {
+    my ($orig, $class, @params) = @_;
+    my %param =
+          @params == 1 && ref $params[0] eq 'HASH' ? %{ $params[0] }
+        : @params == 1 && ref $params[0] ne 'HASH' ? ( schema => $params[0] )
+        :                                            @params;
 
-has version => (
-    is       => 'ro',
-    isa      => 'Mobile::UserAgent::WURFL::Version',
-    lazy     => 1,
-    builder  => '_version',
-);
+    $param{schema} ||= Mobile::UserAgent::WURFL::Schema->connect(
+        $param{dsn}, $param{db_user}, $param{db_pass},
+    );
 
-has os => (
-    is       => 'ro',
-    isa      => 'Mobile::UserAgent::WURFL::OS',
-    lazy     => 1,
-    builder  => '_os',
-);
+    return $class->$orig(%param);
+};
+
+sub ua {
+    my ($self, $ua_string) = @_;
+
+    return Mobile::UserAgent::WURFL::UA->new(
+        ua    => $ua_string,
+        wurfl => $self,
+    );
+}
+
+sub device {
+    my ($self, $ua) = @_;
+
+    my $device = $self->schema->resultset('Device')->search(
+        {
+            user_agent => $ua,
+        }
+    );
+
+    die "No device found for '$ua'\n" if !$device->count;
+
+    return wantarray ? $device->first->get_columns : $device->first;
+}
 
 1;
 
@@ -69,6 +85,13 @@ This documentation refers to Mobile::UserAgent::WURFL version 0.1.
    # This section will be as far as many users bother reading, so make it as
    # educational and exemplary as possible.
 
+   my $wurfl = Mobile::UserAgent::WURFL->new(
+        dsn => 'dbi:Pg:name=wurfl',
+        db_user => 'wurfl',
+        db_pass => 'wurfl',
+   );
+
+   my $ua = $wurfl->ua('Mozilla/5.0');
 
 =head1 DESCRIPTION
 
