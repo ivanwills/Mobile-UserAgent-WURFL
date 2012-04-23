@@ -17,7 +17,8 @@ plan skip_all => "Can't find zcat to extract test WURFL file" if !$zcat || !-e $
 require Mobile::UserAgent::WURFL::Schema;
 
 my $schema = Mobile::UserAgent::WURFL::Schema->connect(
-   'dbi:SQLite:dbname=' . $db_file, '', ''
+    #'dbi:SQLite:dbname=' . $db_file, '', ''
+    'dbi:Pg:db=wurfl', '', ''
 );
 $schema->deploy({add_drop_table => 1});
 

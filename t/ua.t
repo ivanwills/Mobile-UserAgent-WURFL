@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Test::More;
 use Path::Class;
+use Data::Dumper qw/Dumper/;
 
 use Mobile::UserAgent::WURFL;
 use Mobile::UserAgent::WURFL::Schema;
@@ -21,7 +22,11 @@ my @ua = ua();
 for my $ua (@ua) {
     $ua = $wurfl->ua($ua);
     ok $ua, "Got User-Agent object for '$ua'";
-    diag Dumper { $ua->device };
+    my $device = $ua->device;
+    ok $device->{device_id}, "Have a device_id";
+    diag Dumper $device;
+    my %capabilities = $ua->capability();
+    diag Dumper { %capabilities };
 }
 
 done_testing;

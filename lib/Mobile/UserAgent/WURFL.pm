@@ -14,7 +14,7 @@ use List::Util;
 #use List::MoreUtils;
 use Data::Dumper qw/Dumper/;
 use English qw/ -no_match_vars /;
-
+use DateTime;
 use Mobile::UserAgent::WURFL::UA;
 
 our $VERSION     = version->new('0.0.1');
@@ -51,17 +51,57 @@ sub ua {
 }
 
 sub device {
-    my ($self, $ua) = @_;
+    my ($self, $ua, $falling) = @_;
 
-    my $device = $self->schema->resultset('Device')->search(
+    my $rs     = $self->schema->resultset('Device');
+    my $device = $rs->search(
         {
             user_agent => $ua,
         }
     );
 
-    die "No device found for '$ua'\n" if !$device->count;
+    if ( !$device->count ) {
+        my $short = $ua;
+        chop $short;
+        chop $short while $short && $short =~ /\W$/;
+        my $fallback = $self->device($short, 1);
+
+
+        if ( !$falling ) {
+            $rs->new({
+                $fallback->get_columns,
+                user_agent => $ua,
+                ts         => DateTime->now,
+            })->insert;
+        }
+
+        return wantarray ? $fallback->get_columns : $fallback;
+    }
 
     return wantarray ? $device->first->get_columns : $device->first;
+}
+
+sub capability {
+    my ($self, $device_id, $group_id) = @_;
+
+    my $rs     = $self->schema->resultset('Capability');
+    my $capability = $rs->search(
+        {
+            device_id => $device_id,
+        }
+    );
+
+    if ( $capability->count() == 0 ) {
+        my $rs     = $self->schema->resultset('Device');
+        my $device = $rs->search(
+            {
+                device_id => $device_id,
+            }
+        );
+        return $self->capability($device->first->fall_back, $group_id);
+    }
+
+    return wantarray ? $capability->first->get_columns : $capability->first;
 }
 
 1;

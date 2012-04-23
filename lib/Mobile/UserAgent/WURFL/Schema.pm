@@ -24,6 +24,7 @@ sub update_db {
     my ( $device_id, $group_id );
     my $device     = $self->resultset('Device');
     my $capability = $self->resultset('Capability');
+    my (@devices, @capabilities);
 
     my $xp = XML::Parser->new(
         Style => "Object",
@@ -36,23 +37,32 @@ sub update_db {
                 }
                 if ( $element eq 'device' ) {
                     my %device = %attrs;
-                    $device{device_id} = $device{id};
+                    $device{created_by} = "WURFL";
+                    $device{device_id}  = $device{id};
                     delete $device{id};
-                    $device->new(\%device)->insert;
+                    #$device->new(\%device)->insert;
+                    push @devices, \%device;
 
                     $device_id = $device{device_id};
                 }
                 if ( $element eq 'capability' ) {
                     my %capability = %attrs;
-                    $capability{device_id} = $device_id;
-                    $capability{group_id} = $group_id;
-                    $capability->new(\%capability)->insert;
+                    $capability{created_by} = "WURFL";
+                    $capability{device_id}  = $device_id;
+                    $capability{group_id}   = $group_id;
+                    #$capability->new(\%capability)->insert;
+                    push @capabilities, \%capability;
                 }
             },
         }
     );
+
     $self->txn_do(
-        sub { $xp->parse($wurfl); }
+        sub {
+            $xp->parse($wurfl);
+            $device->populate(\@devices);
+            $capability->populate(\@capabilities);
+        }
     );
 
     return;

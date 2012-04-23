@@ -53,11 +53,23 @@ has os => (
     lazy     => 1,
     builder  => '_os',
 );
+has device => (
+    is       => 'ro',
+    isa      => 'HashRef',
+    lazy     => 1,
+    builder  => '_device',
+);
 
-sub device {
+sub _device {
     my ($self) = @_;
 
-    return $self->wurfl->device($self->ua);
+    return { $self->wurfl->device($self->ua) };
+}
+
+sub capability {
+    my ($self, $group) = @_;
+
+    return $self->wurfl->capability($self->device->{device_id}, $group);
 }
 
 1;

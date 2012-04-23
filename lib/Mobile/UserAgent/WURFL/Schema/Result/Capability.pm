@@ -88,6 +88,8 @@ __PACKAGE__->add_columns(
     is_nullable   => 1,
     original      => { default_value => \"now()" },
   },
+  "created_by",
+  { data_type => "varchar", default_value => "", is_nullable => 1, size => 255 },
 );
 
 
